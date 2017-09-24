@@ -35,9 +35,9 @@ public class Main {
         
         // Condiciones iniciales
 		puestos = Integer.parseInt(Config.getInstance().getProperty("puestos"));
-		t = LocalDateTime.of(2017, 9, 21, 9, 0,0);
+		t = LocalDateTime.of(2017, 9, 20, 9, 0,0);
 		tInicial = t;
-		tf = LocalDateTime.of(2017, 9, 21, 9, 40,0);
+		tf = LocalDateTime.of(2017, 9, 30, 18, 0,0);
 		np = 0;
 		ns = 0;
 		nta = 0;
@@ -69,20 +69,18 @@ public class Main {
 				t = tpll;
 				tpll = tpll.plusMinutes(obtenerIntervaloEntreArribos());
 				double random = random();
-				if(random < 0.4){
+				if(random <= 0.6){
 					// LLEAGADA A COLA DE BAJA PRIORIDAD
 					ns++;
 					ntb++;
 					stllb = stllb + getMinutes(t);
 					if(ns + np <= puestos){
-						//if(np == 0){
-							long ta = obtenerTiempoDeAtencion();
-							stab = stab + ta;
-							int x = buscarTpsHV(tps);
-							tps[x].setTime(t.plusMinutes(ta));
-							tps[x].setPrioridadAlta(false);
-							if(ito[x] != null) sto[x] = sto[x] + getMinutes(t) - getMinutes(ito[x]);
-						//}
+						long ta = obtenerTiempoDeAtencion();
+						stab = stab + ta;
+						int x = buscarTpsHV(tps);
+						tps[x].setTime(t.plusMinutes(ta));
+						tps[x].setPrioridadAlta(false);
+						if(ito[x] != null) sto[x] = sto[x] + getMinutes(t) - getMinutes(ito[x]);
 					}
 				}else{
 					// LLEGADA A COLA DE ALTA PRIORIDAD
@@ -176,7 +174,8 @@ public class Main {
 		Long sec = (long) (t.getSecond() / 60);
 		Long min = (long) t.getMinute();
 		Long hour = (long) t.getHour() * 60;
-		return sec + min + hour;
+		Long day = (long) t.getDayOfMonth() * 60 * 60;
+		return sec + min + hour + day;
 	}
 
 	private static double random(){
