@@ -2,16 +2,18 @@ package simulacion;
 
 import java.time.LocalDateTime;
 
+import org.joda.time.DateTime;
+
 public class Tps {
-	private LocalDateTime time;
+	private DateTime time;
 	private Boolean prioridadAlta;
-	public LocalDateTime getTime() {
+	public DateTime getTime() {
 		return time;
 	}
-	public void setTime(LocalDateTime time) {
+	public void setTime(DateTime time) {
 		this.time = time;
 	}
-	public Boolean getPrioridadAlta() {
+	public boolean getPrioridadAlta() {
 		return prioridadAlta;
 	}
 	public void setPrioridadAlta(Boolean prioridadAlta) {

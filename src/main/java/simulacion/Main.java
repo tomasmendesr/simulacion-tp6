@@ -3,15 +3,20 @@ package simulacion;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 
 public class Main {
 	
-	public static LocalDateTime HV = LocalDateTime.of(2600, 9, 21, 9, 0,0);
+	public static DateTime HV = new DateTime(2600, 9, 21, 9, 0,0);
 	public static int MAX = 100;
 
 	public static void main(String[] args) {
 		Tps[] tps; // Tiempo proxima salida (i)
-        LocalDateTime tpll; // Teimpo proxima llegada
+		DateTime tpll; // Teimpo proxima llegada
         long[] sto; // Sumatoria tiempo ocioso (i)
         double[] pto; // Porcentaje tiempo ocioso (i)
         long staa; // Sumatoria tiempo atencion Alta prioridad
@@ -22,12 +27,12 @@ public class Main {
         double pecb; // Promedio espera cola B
         long stlla;  // Sumatoria tiempo llegada cola A
         long stllb; // Sumatoria tiempo llegada cola B
-        LocalDateTime[] ito; // Inicio tiempo ocioso (i)
+        DateTime[] ito; // Inicio tiempo ocioso (i)
         long stsa; // Sumatoria tiempo salida A
         long stsb; // Sumatoria tiempo salida B
         int ns; // Cantidad de elementos en la cola de Baja prioridad
         int np; // Cantidad de elementos en la cola de Alta prioridad
-        LocalDateTime t, tf, tInicial; // Tiempo inicial, tiempo final;
+        DateTime t, tf, tInicial; // Tiempo inicial, tiempo final;
         int puestos;
 		int i;
 		int nta; // Contador de elementos para A
@@ -35,9 +40,9 @@ public class Main {
         
         // Condiciones iniciales
 		puestos = Integer.parseInt(Config.getInstance().getProperty("puestos"));
-		t = LocalDateTime.of(2017, 9, 20, 9, 0,0);
+		t = new DateTime(2017, 9, 20, 9, 0,0);
 		tInicial = t;
-		tf = LocalDateTime.of(2017, 9, 30, 18, 0,0);
+		tf = new DateTime(2017, 9, 30, 18, 0,0);
 		np = 0;
 		ns = 0;
 		nta = 0;
@@ -50,7 +55,7 @@ public class Main {
 		stab = 0;
 		tps = new Tps[puestos];
 		sto = new long[puestos]; 
-        ito = new LocalDateTime[puestos]; 
+        ito = new DateTime[puestos]; 
         pto = new double[puestos];
         for(int j = 0;j<puestos;j++){
         	pto[j] = 0;
@@ -78,7 +83,7 @@ public class Main {
 						long ta = obtenerTiempoDeAtencion();
 						stab = stab + ta;
 						int x = buscarTpsHV(tps);
-						tps[x].setTime(t.plusMinutes(ta));
+						tps[x].setTime(t.plusMinutes((int) ta));
 						tps[x].setPrioridadAlta(false);
 						if(ito[x] != null) sto[x] = sto[x] + getMinutes(t) - getMinutes(ito[x]);
 					}
@@ -91,9 +96,9 @@ public class Main {
 						long ta = obtenerTiempoDeAtencion();
 						staa = staa + ta;
 						int x = buscarTpsHV(tps);
-						tps[x].setTime(t.plusMinutes(ta));
+						tps[x].setTime(t.plusMinutes((int) ta));
 						tps[x].setPrioridadAlta(true);
-						if(ito[x] != null) sto[x] = sto[x] + getMinutes(t) - getMinutes(ito[x]);
+						if(ito[x] != null) sto[x] = (long) (sto[x] + diffInMinutes(t, ito[x]));
 					}
 				}
 			}else{
@@ -110,7 +115,7 @@ public class Main {
 				}
 				if(ns + np >= puestos){
 					long ta = obtenerTiempoDeAtencion();
-					tps[i].setTime(t.plusMinutes(ta));
+					tps[i].setTime(t.plusMinutes((int) ta));
 					if(np == 0){
 						tps[i].setPrioridadAlta(false);
 						stab = stab + ta;
@@ -139,7 +144,7 @@ public class Main {
 		peca = nta != 0 ? (stsa - stlla - staa) / nta : 0;
 		ppsb = ntb != 0 ? (stsb - stllb) / ntb : 0;
 		pecb = ntb != 0 ? (stsb - stllb - stab) / ntb : 0;
-		double minTotales = getMinutes(tf) - getMinutes(tInicial);
+		double minTotales = diffInMinutes(tf, tInicial);
 		DecimalFormat df = new DecimalFormat("#0.00");
 		for(int k = 0;k<puestos;k++){
 			pto[k] = sto[k] != 0 ? (sto[k] / minTotales) * 100 : 0;
@@ -152,6 +157,10 @@ public class Main {
 
 	}
 	
+	private static double diffInMinutes(DateTime  tf, DateTime  tInicial) {
+		return TimeUnit.MILLISECONDS.toMinutes(tf.getMillis() - tInicial.getMillis());
+	}
+
 	private static int buscarTpsHV(Tps[] tps) {
 		int result = 0;
 		for(int i = 0;i<tps.length;i++){
@@ -170,12 +179,8 @@ public class Main {
 		return r.nextInt(High-Low) + Low;
 	}
 
-	private static long getMinutes(LocalDateTime t) {
-		Long sec = (long) (t.getSecond() / 60);
-		Long min = (long) t.getMinute();
-		Long hour = (long) t.getHour() * 60;
-		Long day = (long) t.getDayOfMonth() * 60 * 60;
-		return sec + min + hour + day;
+	private static long getMinutes(DateTime t) {
+		return TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
 	}
 
 	private static double random(){
