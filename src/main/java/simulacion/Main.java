@@ -39,7 +39,7 @@ public class Main {
 		puestos = Integer.parseInt(Config.getInstance().getProperty("puestos"));
 		t = new DateTime(2017, 9, 10, 9, 0,0);
 		tInicial = t;
-		tf = new DateTime(2017, 9, 15, 12, 0,0);
+		tf = new DateTime(2017, 9, 20, 12, 0,0);
 		np = 0;
 		ns = 0;
 		nta = 0;
@@ -101,19 +101,25 @@ public class Main {
 			}else{
 				// SALIDA (i)
 				t = tps[i].getTime();
-				if(!tps[i].getPrioridadAlta()){
+				if(tps[i].getPrioridadAlta()){
 					// Se van de la cola de baja prioridad
-					ns--;
-					stsb = stsb + TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
-				}else{
 					// Se va de la cola de alta prioridad
 					np--;
 					stsa = stsa + TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
+				}else{
+					ns--;
+					stsb = stsb + TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
 				}
 				if(ns + np >= puestos){
 					long ta = obtenerTiempoDeAtencion();
 					tps[i].setTime(t.plusMinutes((int) ta));
-					if(np >= puestos){
+					int puestosAtendiendoNp = 0;
+					for(int z = 0;z<tps.length;z++){
+						if(z != i){
+							if(tps[z].getPrioridadAlta()) puestosAtendiendoNp++;
+						}
+					}
+					if(np >= puestos || np > puestosAtendiendoNp){
 						staa = staa + ta;
 						tps[i].setPrioridadAlta(true);
 					}else{
