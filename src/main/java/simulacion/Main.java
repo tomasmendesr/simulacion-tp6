@@ -1,18 +1,15 @@
 package simulacion;
 
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.Period;
 
 public class Main {
 	
 	public static DateTime HV = new DateTime(2600, 9, 21, 9, 0,0);
-	public static int MAX = 100;
+	public static int MAX = 1000000;
 
 	public static void main(String[] args) {
 		Tps[] tps; // Tiempo proxima salida (i)
@@ -40,9 +37,9 @@ public class Main {
         
         // Condiciones iniciales
 		puestos = Integer.parseInt(Config.getInstance().getProperty("puestos"));
-		t = new DateTime(2017, 9, 20, 9, 0,0);
+		t = new DateTime(2017, 9, 10, 9, 0,0);
 		tInicial = t;
-		tf = new DateTime(2017, 9, 30, 18, 0,0);
+		tf = new DateTime(2017, 9, 15, 12, 0,0);
 		np = 0;
 		ns = 0;
 		nta = 0;
@@ -78,20 +75,20 @@ public class Main {
 					// LLEAGADA A COLA DE BAJA PRIORIDAD
 					ns++;
 					ntb++;
-					stllb = stllb + getMinutes(t);
+					stllb = stllb + TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
 					if(ns + np <= puestos){
 						long ta = obtenerTiempoDeAtencion();
 						stab = stab + ta;
 						int x = buscarTpsHV(tps);
 						tps[x].setTime(t.plusMinutes((int) ta));
 						tps[x].setPrioridadAlta(false);
-						if(ito[x] != null) sto[x] = sto[x] + getMinutes(t) - getMinutes(ito[x]);
+						if(ito[x] != null) sto[x] = sto[x] + (long) diffInMinutes(t, ito[x]);
 					}
 				}else{
 					// LLEGADA A COLA DE ALTA PRIORIDAD
 					np++;
 					nta++;
-					stlla = stlla + getMinutes(t);
+					stlla = stlla + TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
 					if(ns + np <= puestos){
 						long ta = obtenerTiempoDeAtencion();
 						staa = staa + ta;
@@ -107,21 +104,21 @@ public class Main {
 				if(!tps[i].getPrioridadAlta()){
 					// Se van de la cola de baja prioridad
 					ns--;
-					stsb = stsb + getMinutes(t);
+					stsb = stsb + TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
 				}else{
 					// Se va de la cola de alta prioridad
 					np--;
-					stsa = stsa + getMinutes(t);
+					stsa = stsa + TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
 				}
 				if(ns + np >= puestos){
 					long ta = obtenerTiempoDeAtencion();
 					tps[i].setTime(t.plusMinutes((int) ta));
-					if(np == 0){
-						tps[i].setPrioridadAlta(false);
-						stab = stab + ta;
-					}else{
+					if(np >= puestos){
 						staa = staa + ta;
 						tps[i].setPrioridadAlta(true);
+					}else{
+						tps[i].setPrioridadAlta(false);
+						stab = stab + ta;
 					}
 				}else{
 					ito[i] = t;
@@ -140,20 +137,21 @@ public class Main {
 		
 		System.out.println("Llegaron " + nta + " tickets de Alta prioridad");
 		System.out.println("Llegaron " + ntb + " tickets de Baja prioridad");
-		ppsa = nta != 0 ? (stsa - stlla) / nta : 0;
-		peca = nta != 0 ? (stsa - stlla - staa) / nta : 0;
-		ppsb = ntb != 0 ? (stsb - stllb) / ntb : 0;
-		pecb = ntb != 0 ? (stsb - stllb - stab) / ntb : 0;
+		int nt = nta + ntb;
+		ppsa = nta != 0 ? (stsa - stlla) / nt : 0;
+		peca = nta != 0 ? (stsa - stlla - staa) / nt : 0;
+		ppsb = ntb != 0 ? (stsb - stllb) / nt : 0;
+		pecb = ntb != 0 ? (stsb - stllb - stab) / nt : 0;
 		double minTotales = diffInMinutes(tf, tInicial);
 		DecimalFormat df = new DecimalFormat("#0.00");
 		for(int k = 0;k<puestos;k++){
 			pto[k] = sto[k] != 0 ? (sto[k] / minTotales) * 100 : 0;
-			System.out.println("Porcentaje tiempo ocioso puesto #" + k + ": " + df.format(pto[k]) + "%");
+			System.out.println("Porcentaje tiempo ocioso puesto #" + (k + 1) + ": " + df.format(pto[k]) + "%");
 		}
-		System.out.println("Promedio permanencia sistema A: " + df.format(ppsa) + " minutos");
-		System.out.println("Promedio permanencia sistema B: " + df.format(ppsb) + " minutos");
-		System.out.println("Promedio espera cola A: " + df.format(peca) + " minutos");
-		System.out.println("Promedio espera cola B: " + df.format(pecb) + " minutos");
+		System.out.println("Promedio permanencia sistema A: " + Math.round(ppsa) + " minutos");
+		System.out.println("Promedio permanencia sistema B: " + Math.round(ppsb) + " minutos");
+		System.out.println("Promedio espera cola A: " + Math.round(peca) + " minutos");
+		System.out.println("Promedio espera cola B: " + Math.round(pecb) + " minutos");
 
 	}
 	
@@ -161,8 +159,8 @@ public class Main {
 		return TimeUnit.MILLISECONDS.toMinutes(tf.getMillis() - tInicial.getMillis());
 	}
 
-	private static int buscarTpsHV(Tps[] tps) {
-		int result = 0;
+	private static Integer buscarTpsHV(Tps[] tps) {
+		Integer result = null;
 		for(int i = 0;i<tps.length;i++){
 			if(tps[i].getTime() == HV){
 				result = i;
@@ -177,10 +175,6 @@ public class Main {
 		int Low = 20;
 		int High = 40;
 		return r.nextInt(High-Low) + Low;
-	}
-
-	private static long getMinutes(DateTime t) {
-		return TimeUnit.MILLISECONDS.toMinutes(t.getMillis());
 	}
 
 	private static double random(){
