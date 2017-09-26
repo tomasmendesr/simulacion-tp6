@@ -119,7 +119,7 @@ public class Main {
 							if(tps[z].getPrioridadAlta()) puestosAtendiendoNp++;
 						}
 					}
-					if(np >= puestos || np > puestosAtendiendoNp){
+					if(np > puestosAtendiendoNp){
 						staa = staa + ta;
 						tps[i].setPrioridadAlta(true);
 					}else{
@@ -143,11 +143,10 @@ public class Main {
 		
 		System.out.println("Llegaron " + nta + " tickets de Alta prioridad");
 		System.out.println("Llegaron " + ntb + " tickets de Baja prioridad");
-		int nt = nta + ntb;
-		ppsa = nta != 0 ? (stsa - stlla) / nt : 0;
-		peca = nta != 0 ? (stsa - stlla - staa) / nt : 0;
-		ppsb = ntb != 0 ? (stsb - stllb) / nt : 0;
-		pecb = ntb != 0 ? (stsb - stllb - stab) / nt : 0;
+		ppsa = nta != 0 ? (stsa - stlla) / nta : 0;
+		peca = nta != 0 ? (stsa - stlla - staa) / nta : 0;
+		ppsb = ntb != 0 ? (stsb - stllb) / ntb : 0;
+		pecb = ntb != 0 ? (stsb - stllb - stab) / ntb : 0;
 		double minTotales = diffInMinutes(tf, tInicial);
 		DecimalFormat df = new DecimalFormat("#0.00");
 		for(int k = 0;k<puestos;k++){
@@ -178,8 +177,8 @@ public class Main {
 
 	private static long obtenerTiempoDeAtencion() {
 		Random r = new Random();
-		int Low = 20;
-		int High = 40;
+		int Low = 40;
+		int High = 60;
 		return r.nextInt(High-Low) + Low;
 	}
 
@@ -190,8 +189,8 @@ public class Main {
 
 	private static int obtenerIntervaloEntreArribos() {
 		Random r = new Random();
-		int Low = 10;
-		int High = 30;
+		int Low = 5;
+		int High = 10;
 		return r.nextInt(High-Low) + Low;
 	}
 
