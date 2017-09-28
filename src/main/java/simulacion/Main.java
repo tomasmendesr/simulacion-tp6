@@ -39,7 +39,7 @@ public class Main {
 		puestos = Integer.parseInt(Config.getInstance().getProperty("puestos"));
 		t = new DateTime(2017, 9, 10, 9, 0,0);
 		tInicial = t;
-		tf = new DateTime(2017, 9, 20, 12, 0,0);
+		tf = new DateTime(2017, 9, 10, 12, 0,0);
 		np = 0;
 		ns = 0;
 		nta = 0;
@@ -204,16 +204,18 @@ public class Main {
 	
 	private static long obtenerTAComplejidadMedia(){
 		double r = random();
-		return (long) (30 * r + 28);
+		long result;
+		result = (long) (30 * r + 28);
+		return result;
 	}
 	
 	private static long obtenerTAComplejidadBaja(){
-		double r = random();
 		long result = MAX;
-		while(result < 10 && result > 30){
+		while(result < 10 || result > 30){
+			double r = random();
 			result = (long) (Math.log(1 - r) / (-0.05));
 		}
-		return (long) (30 * r + 28);
+		return result;
 	}
 
 	private static double random(){
@@ -222,9 +224,9 @@ public class Main {
 	}
 
 	private static int obtenerIntervaloEntreArribos() {
-		double random = random();
 		double result = MAX;
 		while(result > 36){
+			double random = random();
 			result = 13 / (Math.sqrt(1 - random));
 		}
 		return (int) Math.round(result);
