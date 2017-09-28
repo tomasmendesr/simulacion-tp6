@@ -201,16 +201,16 @@ public class Main {
 	}
 	
 	private static long obtenerTAComplejidadAlta(){
-		long result = MAX;
+		double result = MAX;
 		for(;;){
 			double r = random();
-			result = (long) (Math.sqrt(170 * r) + 58); 
+			result = Math.sqrt(170 * r) + 58; 
 			if(result >= 58 && result <= 63){
-				return result;
+				return Math.round(result);
 			}else{
 				result = (long) (92 - Math.sqrt((1-r)*986));
 				if(result >= 63 && result <= 92){
-					return result;
+					return Math.round(result);
 				}
 			}
 		}
@@ -227,7 +227,7 @@ public class Main {
 		long result = MAX;
 		while(result < 10 || result > 30){
 			double r = random();
-			result = (long) (Math.log(1 - r) / (-0.05));
+			result = Math.round((Math.log(1 - r) / (-0.05)));
 		}
 		return result;
 	}
