@@ -176,10 +176,44 @@ public class Main {
 	}
 
 	private static long obtenerTiempoDeAtencion() {
-		Random r = new Random();
-		int Low = 40;
-		int High = 60;
-		return r.nextInt(High-Low) + Low;
+		double r = random();
+		if(r <= 0.55){
+			return obtenerTAComplejidadBaja();
+		}else if( r <= 85){
+			return obtenerTAComplejidadMedia();
+		}else{
+			return obtenerTAComplejidadAlta();
+		}
+	}
+	
+	private static long obtenerTAComplejidadAlta(){
+		long result = MAX;
+		for(;;){
+			double r = random();
+			result = (long) (Math.sqrt(170 * r) + 58); 
+			if(result >= 58 && result <= 63){
+				return result;
+			}else{
+				result = (long) (92 - Math.sqrt((1-r)*986));
+				if(result >= 63 && result <= 92){
+					return result;
+				}
+			}
+		}
+	}
+	
+	private static long obtenerTAComplejidadMedia(){
+		double r = random();
+		return (long) (30 * r + 28);
+	}
+	
+	private static long obtenerTAComplejidadBaja(){
+		double r = random();
+		long result = MAX;
+		while(result < 10 && result > 30){
+			result = (long) (Math.log(1 - r) / (-0.05));
+		}
+		return (long) (30 * r + 28);
 	}
 
 	private static double random(){
@@ -188,10 +222,12 @@ public class Main {
 	}
 
 	private static int obtenerIntervaloEntreArribos() {
-		Random r = new Random();
-		int Low = 5;
-		int High = 10;
-		return r.nextInt(High-Low) + Low;
+		double random = random();
+		double result = MAX;
+		while(result > 36){
+			result = 13 / (Math.sqrt(1 - random));
+		}
+		return (int) Math.round(result);
 	}
 
 	private static int buscarMenorTPS(Tps[] tps) {
