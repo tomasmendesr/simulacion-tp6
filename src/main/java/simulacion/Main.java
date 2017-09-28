@@ -37,9 +37,10 @@ public class Main {
         
         // Condiciones iniciales
 		puestos = Integer.parseInt(Config.getInstance().getProperty("puestos"));
+		boolean calcularEnBaseAlTotal = Config.getInstance().getProperty("calcularEnBaseAlTotal").toString().equals("si");
 		t = new DateTime(2017, 9, 10, 9, 0,0);
 		tInicial = t;
-		tf = new DateTime(2017, 9, 10, 12, 0,0);
+		tf = new DateTime(2017, 9, 20, 12, 0,0);
 		np = 0;
 		ns = 0;
 		nta = 0;
@@ -141,16 +142,29 @@ public class Main {
 			}
 		}
 		
+		System.out.println("Con " + puestos + " puestos");
 		System.out.println("Llegaron " + nta + " tickets de Alta prioridad");
 		System.out.println("Llegaron " + ntb + " tickets de Baja prioridad");
-		ppsa = nta != 0 ? (stsa - stlla) / nta : 0;
-		peca = nta != 0 ? (stsa - stlla - staa) / nta : 0;
-		ppsb = ntb != 0 ? (stsb - stllb) / ntb : 0;
-		pecb = ntb != 0 ? (stsb - stllb - stab) / ntb : 0;
+		int nt = nta + ntb;
+		if(calcularEnBaseAlTotal){
+			ppsa = nta != 0 ? (stsa - stlla) / nt : 0;
+			peca = nta != 0 ? (stsa - stlla - staa) / nt : 0;
+			ppsb = ntb != 0 ? (stsb - stllb) / nt : 0;
+			pecb = ntb != 0 ? (stsb - stllb - stab) / nt : 0;
+		}else{
+			ppsa = nta != 0 ? (stsa - stlla) / nta : 0;
+			peca = nta != 0 ? (stsa - stlla - staa) / nta : 0;
+			ppsb = ntb != 0 ? (stsb - stllb) / ntb : 0;
+			pecb = ntb != 0 ? (stsb - stllb - stab) / ntb : 0;
+		}
 		double minTotales = diffInMinutes(tf, tInicial);
 		DecimalFormat df = new DecimalFormat("#0.00");
 		for(int k = 0;k<puestos;k++){
-			pto[k] = sto[k] != 0 ? (sto[k] / minTotales) * 100 : 0;
+			if(ito[k] != null){
+				pto[k] = sto[k] != 0 ? (sto[k] / minTotales) * 100 : 0;
+			}else{
+				pto[k] = 100;
+			}
 			System.out.println("Porcentaje tiempo ocioso puesto #" + (k + 1) + ": " + df.format(pto[k]) + "%");
 		}
 		System.out.println("Promedio permanencia sistema A: " + Math.round(ppsa) + " minutos");
