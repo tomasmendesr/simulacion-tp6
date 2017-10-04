@@ -208,7 +208,7 @@ public class Main {
 			if(result >= 58 && result <= 63){
 				return Math.round(result);
 			}else{
-				result = (long) (92 - Math.sqrt((1-r)*986));
+				result = 92 - Math.sqrt((1-r)*986);
 				if(result >= 63 && result <= 92){
 					return Math.round(result);
 				}
@@ -218,9 +218,7 @@ public class Main {
 	
 	private static long obtenerTAComplejidadMedia(){
 		double r = random();
-		long result;
-		result = (long) (30 * r + 28);
-		return result;
+		return Math.round((long) (30 * r + 28));
 	}
 	
 	private static long obtenerTAComplejidadBaja(){
